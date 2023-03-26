@@ -18,7 +18,7 @@ export const AppRoutes = [
     },
     {
       key: "order",
-      path: '/order',
+      path: '/order/:type',
       element: <Order/>,
       exact: true
     }

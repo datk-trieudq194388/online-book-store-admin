@@ -1,4 +1,6 @@
-import { RefreshToken, SERVER_ADDR } from "../configs/config";
+import { SERVER_ADDR } from "../configs/config";
+import jwt_decode from "jwt-decode";
+import Cookies from 'js-cookie';
 
 export const login = async (account) => {
 
@@ -22,8 +24,7 @@ export const login = async (account) => {
 } 
 
 export const logout = async () => {
-
-    const validRefToken = await RefreshToken();
+    const validRefToken = await validRefreshToken();
     if(!validRefToken) return false;
 
     const token = localStorage.getItem('accessToken');
@@ -41,22 +42,38 @@ export const logout = async () => {
     return {data: data, status: response.status, ok: response.ok};
 } 
 
-export const getRefreshToken = async (refreshToken) => {
+export const validRefreshToken = async () => {
+    const accessToken = localStorage.getItem('accessToken');
+    const decodedToken = jwt_decode(accessToken);
 
-    const options = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${refreshToken}`
+    if(Date.now() >= decodedToken.exp * 1000){
+        const refreshToken = Cookies.get('refreshToken');
+        console.log(refreshToken)
+        
+        const options = {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${refreshToken}`
+            }
         }
+        const response = await fetch(`${SERVER_ADDR}/refresh-token`, options);
+        
+        const res = await response.json();
+
+        if(!response.ok){
+            alert('Bạn cần đăng nhập lại!')
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('firstname');
+            Cookies.remove('refreshToken');
+            return false;
+        }
+        localStorage.setItem('acceToken', res.data.accessToken);
+        Cookies.set('refreshToken', res.data.refreshToken, { expires: 30}); 
     }
-    const response = await fetch(`${SERVER_ADDR}/refresh-token`, options);
-    
-    const data = await response.json();
-    console.log(data)
+    else console.log('valid token')
 
-    return {data: data, ok: response.ok}
-
+    return true;
 }
 
 

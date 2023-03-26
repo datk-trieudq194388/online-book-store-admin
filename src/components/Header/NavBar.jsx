@@ -14,7 +14,7 @@ function NavBar() {
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) setIsLoggedIn(true)
         else setIsLoggedIn(false)
-      });
+    });
 
     async function handleLogOut() {
 
@@ -45,9 +45,9 @@ function NavBar() {
             <Container>
             <Navbar.Brand href="/">Brightbook</Navbar.Brand>
             <Nav className="me-auto">
-                <Nav.Link href="title">Quản lý sách</Nav.Link>
-                <Nav.Link href="order">Quản lý đơn hàng</Nav.Link>
-                <Nav.Link href="login" hidden={isLoggedIn}>Đăng nhập</Nav.Link>
+                <Nav.Link href={isLoggedIn ? '/title/all' : '/login'}>Quản lý sách</Nav.Link>
+                <Nav.Link href={isLoggedIn ? '/order/all' : '/login'}>Quản lý đơn hàng</Nav.Link>
+                <Nav.Link href="/login" hidden={isLoggedIn}>Đăng nhập</Nav.Link>
                 <Nav.Link onClick={handleLogOut} hidden={!isLoggedIn}>Đăng xuất</Nav.Link>
             </Nav>
             </Container>
