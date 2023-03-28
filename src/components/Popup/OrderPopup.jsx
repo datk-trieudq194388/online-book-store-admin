@@ -8,6 +8,7 @@ import { getDistrictName, getProvinceName, getWardName } from '../../configs/Vie
 import { BookStatus, OrderStatus } from '../../configs/global';
 import './orderPopup.css'
 import { updateBook } from '../../api/BookAPI';
+import { updateTitleSold } from '../../api/TitleAPI';
 
 function OrderPopup(props) {
     const navigate = useNavigate();
@@ -129,6 +130,29 @@ function OrderPopup(props) {
             fetchProfileData();
             props.onRefresh();
             props.onHide();
+            const items = order.items;
+            for(let i in items){
+                for(let j in items[i].bookIDs){
+                    const res = await updateBook(items[i].bookIDs[j], {status: BookStatus.SOLD});
+                
+                    if(res === false){
+                        navigate('/login');
+                        window.scrollTo(0, 0);
+                    }
+                    else if (!res.ok)
+                        alert('Gửi yêu cầu thất bại, hãy thử lại!')
+                    else console.log('updated book successfully!');
+                }
+                
+                const res = await updateTitleSold(items[i].titleID, {sold: items[i].count});
+                if(res === false){
+                    navigate('/login');
+                    window.scrollTo(0, 0);
+                }
+                else if (!res.ok)
+                    alert('Gửi yêu cầu thất bại, hãy thử lại!')
+                else console.log('updated title successfully!');
+            }
         }
     }
 
